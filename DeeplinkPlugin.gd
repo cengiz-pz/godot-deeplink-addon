@@ -88,6 +88,11 @@ class AndroidExportPlugin extends EditorExportPlugin:
 		var __filters: String = ""
 
 		var __deeplink_nodes: Array = Deeplink.get_deeplink_nodes(EditorInterface.get_edited_scene_root())
+		if __deeplink_nodes.is_empty():
+			var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
+			__deeplink_nodes: Array = Deeplink.get_deeplink_nodes(__main_scene)
+			if __deeplink_nodes.is_empty():
+				push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
 
 		for __node in __deeplink_nodes:
 			var __deeplink_node = __node as Deeplink
@@ -108,6 +113,17 @@ class IosExportPlugin extends EditorExportPlugin:
 	var _plugin_name = PLUGIN_NAME
 	var _export_path: String
 
+	const ENTITLEMENTS_FILE_HEADER: String = """<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+	<plist version="1.0">
+	<dict>
+		<key>com.apple.developer.associated-domains</key>
+		<array>\n"""
+
+	const ENTITLEMENTS_FILE_FOOTER: String = """\t</array>
+	</dict>
+	</plist>\n"""
+	const EXPORT_FILE_SUFFIX: String = ".ipa"
 
 	func _supports_platform(platform: EditorExportPlatform) -> bool:
 		if platform is EditorExportPlatformIOS:
@@ -144,6 +160,12 @@ class IosExportPlugin extends EditorExportPlugin:
 						__file.store_string(ENTITLEMENTS_FILE_HEADER)
 
 						var __deeplink_nodes: Array = Deeplink.get_deeplink_nodes(EditorInterface.get_edited_scene_root())
+						if __deeplink_nodes.is_empty():
+							var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
+							__deeplink_nodes: Array = Deeplink.get_deeplink_nodes(__main_scene)
+							if __deeplink_nodes.is_empty():
+								push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
+
 						for __node in __deeplink_nodes:
 							var __deeplink_node = __node as Deeplink
 							__file.store_line("\t\t<string>applinks:%s</string>" % __deeplink_node.host)
