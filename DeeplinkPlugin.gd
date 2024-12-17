@@ -90,7 +90,7 @@ class AndroidExportPlugin extends EditorExportPlugin:
 		var __deeplink_nodes: Array = Deeplink.get_deeplink_nodes(EditorInterface.get_edited_scene_root())
 		if __deeplink_nodes.is_empty():
 			var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
-			__deeplink_nodes: Array = Deeplink.get_deeplink_nodes(__main_scene)
+			__deeplink_nodes = Deeplink.get_deeplink_nodes(__main_scene)
 			if __deeplink_nodes.is_empty():
 				push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
 
@@ -162,7 +162,7 @@ class IosExportPlugin extends EditorExportPlugin:
 						var __deeplink_nodes: Array = Deeplink.get_deeplink_nodes(EditorInterface.get_edited_scene_root())
 						if __deeplink_nodes.is_empty():
 							var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
-							__deeplink_nodes: Array = Deeplink.get_deeplink_nodes(__main_scene)
+							__deeplink_nodes = Deeplink.get_deeplink_nodes(__main_scene)
 							if __deeplink_nodes.is_empty():
 								push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
 
