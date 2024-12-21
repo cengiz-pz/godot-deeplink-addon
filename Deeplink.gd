@@ -59,7 +59,7 @@ func is_domain_associated(a_domain: String) -> bool:
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
-	return __result
+	return __result
 
 
 func navigate_to_open_by_default_settings() -> void:
