@@ -8,7 +8,6 @@ extends EditorPlugin
 const PLUGIN_NODE_TYPE_NAME: String = "@pluginNodeType@"
 const PLUGIN_PARENT_NODE_TYPE: String = "Node"
 const PLUGIN_NAME: String = "@pluginName@"
-const PLUGIN_VERSION: String = "@pluginVersion@"
 const PLUGIN_DEPENDENCIES: Array = [ @pluginDependencies@ ]
 
 var android_export_plugin: AndroidExportPlugin
@@ -71,9 +70,9 @@ class AndroidExportPlugin extends EditorExportPlugin:
 
 	func _get_android_libraries(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
 		if debug:
-			return PackedStringArray(["%s/bin/debug/%s-%s-debug.aar" % [_plugin_name, _plugin_name, PLUGIN_VERSION]])
+			return PackedStringArray(["%s/bin/debug/%s-debug.aar" % [_plugin_name, _plugin_name]])
 		else:
-			return PackedStringArray(["%s/bin/release/%s-%s-release.aar" % [_plugin_name, _plugin_name, PLUGIN_VERSION]])
+			return PackedStringArray(["%s/bin/release/%s-release.aar" % [_plugin_name, _plugin_name]])
 
 
 	func _get_name() -> String:

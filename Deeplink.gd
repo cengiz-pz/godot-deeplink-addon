@@ -38,14 +38,28 @@ func _connect_signals() -> void:
 	_plugin_singleton.connect(DEEPLINK_RECEIVED_SIGNAL_NAME, _on_deeplink_received)
 
 
-func is_domain_associated(a_domain: String) -> bool:
-	var __result = false
+func initialize() -> int:
+	var __result = OK
+
 	if _plugin_singleton != null:
-		__result = _plugin_singleton.is_domain_associated(a_domain)
+		__result = _plugin_singleton.initialize()
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
 	return __result
+
+
+func is_domain_associated(a_domain: String) -> bool:
+	var __result = false
+	if _plugin_singleton != null:
+		if _plugin_singleton.has_method("is_domain_associated"):
+			__result = _plugin_singleton.is_domain_associated(a_domain)
+		else:
+			printerr("%s plugin: is_domain_associated() method is not supported on %s" % [PLUGIN_SINGLETON_NAME, OS.get_name()])
+	else:
+		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
+
+	return __result
 
 
 func navigate_to_open_by_default_settings() -> void:
