@@ -52,10 +52,7 @@ func initialize() -> int:
 func is_domain_associated(a_domain: String) -> bool:
 	var __result = false
 	if _plugin_singleton != null:
-		if _plugin_singleton.has_method("is_domain_associated"):
-			__result = _plugin_singleton.is_domain_associated(a_domain)
-		else:
-			printerr("%s plugin: is_domain_associated() method is not supported on %s" % [PLUGIN_SINGLETON_NAME, OS.get_name()])
+		__result = _plugin_singleton.is_domain_associated(a_domain)
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
