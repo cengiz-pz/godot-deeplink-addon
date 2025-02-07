@@ -39,20 +39,21 @@ func load_export_config_from_file() -> Error:
 	if __load_result == Error.OK:
 		var __config_file_sections = __config_file.get_sections()
 		for __config_file_section in __config_file_sections:
-			deeplinks.append(
-				DeeplinkExportConfigItem.new()
-					.set_label(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_LABEL))
-					.set_is_auto_verify(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_AUTO_VERIFY))
-					.set_is_default(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_DEFAULT))
-					.set_is_browsable(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_BROWSABLE))
-					.set_scheme(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_SCHEME))
-					.set_host(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_HOST))
-					.set_path_prefix(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_PATH_PREFIX))
-			)
-
-		if scheme == null or host == null:
-			__result == Error.ERR_INVALID_DATA
-			push_error("Invalid export config file %s!" % CONFIG_FILE_PATH)
+			if not __config_file.has_section_key(__config_file_section, CONFIG_FILE_KEY_SCHEME) \
+					or not __config_file.has_section_key(__config_file_section, CONFIG_FILE_KEY_HOST):
+				__result == Error.ERR_INVALID_DATA
+				push_error("Invalid export config in section: %s of file %s" % [__config_file_section, CONFIG_FILE_PATH])
+			else:
+				deeplinks.append(
+					DeeplinkExportConfigItem.new()
+						.set_label(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_LABEL))
+						.set_is_auto_verify(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_AUTO_VERIFY))
+						.set_is_default(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_DEFAULT))
+						.set_is_browsable(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_BROWSABLE))
+						.set_scheme(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_SCHEME))
+						.set_host(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_HOST))
+						.set_path_prefix(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_PATH_PREFIX))
+				)
 	else:
 		__result = Error.ERR_CANT_OPEN
 		push_error("Failed to open export config file %s!" % CONFIG_FILE_PATH)
@@ -68,10 +69,10 @@ func load_export_config_from_node() -> Error:
 
 	var __result = OK
 
-	var __deeplink_nodes: Array = get_deeplink_nodes(EditorInterface.get_edited_scene_root())
+	var __deeplink_nodes: Array = get_plugin_nodes(EditorInterface.get_edited_scene_root())
 	if __deeplink_nodes.is_empty():
 		var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
-		__deeplink_nodes = get_deeplink_nodes(__main_scene)
+		__deeplink_nodes = get_plugin_nodes(__main_scene)
 		if __deeplink_nodes.is_empty():
 			push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
 
@@ -89,8 +90,6 @@ func load_export_config_from_node() -> Error:
 		)
 
 		print_loaded_config()
-	else:
-		push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
 
 	return __result
 
@@ -116,6 +115,6 @@ func get_plugin_nodes(a_node: Node) -> Array:
 
 	if a_node.get_child_count() > 0:
 		for __child in a_node.get_children():
-			__result.append_array(get_deeplink_nodes(__child))
+			__result.append_array(get_plugin_nodes(__child))
 
 	return __result

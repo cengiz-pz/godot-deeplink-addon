@@ -30,7 +30,7 @@ func _ready() -> void:
 		if Engine.has_singleton(PLUGIN_SINGLETON_NAME):
 			_plugin_singleton = Engine.get_singleton(PLUGIN_SINGLETON_NAME)
 			_connect_signals()
-		else:
+		elif OS.has_feature("editor"):
 			printerr("%s singleton not found!" % PLUGIN_SINGLETON_NAME)
 
 
@@ -119,16 +119,3 @@ func clear_data() -> void:
 
 func _on_deeplink_received(a_data: Dictionary) -> void:
 	deeplink_received.emit(DeeplinkUrl.new(a_data))
-
-
-static func get_deeplink_nodes(a_node: Node) -> Array:
-	var __result: Array = []
-
-	if a_node is Deeplink:
-		__result.append(a_node)
-
-	if a_node.get_child_count() > 0:
-		for __child in a_node.get_children():
-			__result.append_array(get_deeplink_nodes(__child))
-
-	return __result
