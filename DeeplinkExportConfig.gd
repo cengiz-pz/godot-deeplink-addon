@@ -17,6 +17,12 @@ const CONFIG_FILE_KEY_SCHEME: String = "scheme"
 const CONFIG_FILE_KEY_HOST: String = "host"
 const CONFIG_FILE_KEY_PATH_PREFIX: String = "path_prefix"
 
+const DEFAULT_LABEL: String = ""
+const DEFAULT_IS_AUTO_VERIFY: bool = true
+const DEFAULT_IS_DEFAULT: bool = true
+const DEFAULT_IS_BROWSABLE: bool = true
+const DEFAULT_PATH_PREFIX: String = "/"
+
 var deeplinks: Array[DeeplinkExportConfigItem]
 
 
@@ -39,20 +45,21 @@ func load_export_config_from_file() -> Error:
 	if __load_result == Error.OK:
 		var __config_file_sections = __config_file.get_sections()
 		for __config_file_section in __config_file_sections:
+			push_warning("Processing config file section %s" % __config_file_section)
 			if not __config_file.has_section_key(__config_file_section, CONFIG_FILE_KEY_SCHEME) \
 					or not __config_file.has_section_key(__config_file_section, CONFIG_FILE_KEY_HOST):
 				__result == Error.ERR_INVALID_DATA
-				push_error("Invalid export config in section: %s of file %s" % [__config_file_section, CONFIG_FILE_PATH])
+				push_error("""Invalid export config in section "%s" of file "%s".""" % [__config_file_section, CONFIG_FILE_PATH])
 			else:
 				deeplinks.append(
 					DeeplinkExportConfigItem.new()
-						.set_label(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_LABEL))
-						.set_is_auto_verify(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_AUTO_VERIFY))
-						.set_is_default(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_DEFAULT))
-						.set_is_browsable(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_BROWSABLE))
+						.set_label(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_LABEL, DEFAULT_LABEL))
+						.set_is_auto_verify(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_AUTO_VERIFY, DEFAULT_IS_AUTO_VERIFY))
+						.set_is_default(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_DEFAULT, DEFAULT_IS_DEFAULT))
+						.set_is_browsable(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_IS_BROWSABLE, DEFAULT_IS_BROWSABLE))
 						.set_scheme(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_SCHEME))
 						.set_host(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_HOST))
-						.set_path_prefix(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_PATH_PREFIX))
+						.set_path_prefix(__config_file.get_value(__config_file_section, CONFIG_FILE_KEY_PATH_PREFIX, DEFAULT_PATH_PREFIX))
 				)
 	else:
 		__result = Error.ERR_CANT_OPEN
@@ -89,7 +96,7 @@ func load_export_config_from_node() -> Error:
 				.set_path_prefix(__deeplink_node.path_prefix)
 		)
 
-		print_loaded_config()
+	print_loaded_config()
 
 	return __result
 

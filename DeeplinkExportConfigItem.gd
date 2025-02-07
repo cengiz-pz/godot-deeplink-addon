@@ -13,13 +13,6 @@ var host: String
 var path_prefix: String
 
 
-func _init():
-	label = ""
-	is_auto_verify = true
-	is_default = true
-	is_browsable = true
-
-
 func set_label(a_val: String) -> DeeplinkExportConfigItem:
 	label = a_val
 	return self
