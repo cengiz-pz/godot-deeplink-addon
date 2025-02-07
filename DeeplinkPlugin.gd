@@ -32,6 +32,7 @@ func _exit_tree() -> void:
 
 class AndroidExportPlugin extends EditorExportPlugin:
 	var _plugin_name = PLUGIN_NAME
+	var _export_config: DeeplinkExportConfig
 
 	const DEEPLINK_ACTIVITY_FORMAT = """
 		<activity
@@ -79,6 +80,12 @@ class AndroidExportPlugin extends EditorExportPlugin:
 		return _plugin_name
 
 
+	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
+		_export_config = DeeplinkExportConfig.new()
+		if not _export_config.export_config_file_exists() or _export_config.load_export_config_from_file() != OK:
+			_export_config.load_export_config_from_node()
+
+
 	func _get_android_dependencies(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
 		return PackedStringArray(PLUGIN_DEPENDENCIES)
 
@@ -86,23 +93,15 @@ class AndroidExportPlugin extends EditorExportPlugin:
 	func _get_android_manifest_application_element_contents(platform: EditorExportPlatform, debug: bool) -> String:
 		var __filters: String = ""
 
-		var __deeplink_nodes: Array = Deeplink.get_deeplink_nodes(EditorInterface.get_edited_scene_root())
-		if __deeplink_nodes.is_empty():
-			var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
-			__deeplink_nodes = Deeplink.get_deeplink_nodes(__main_scene)
-			if __deeplink_nodes.is_empty():
-				push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
-
-		for __node in __deeplink_nodes:
-			var __deeplink_node = __node as Deeplink
+		for __config in _export_config.deeplinks:
 			__filters += DEEPLINK_INTENT_FILTER_FORMAT % [
-						__deeplink_node.label,
-						DEEPLINK_INTENT_FILTER_AUTO_VERIFY_PROPERTY if __deeplink_node.is_auto_verify else "",
-						DEEPLINK_INTENT_FILTER_DEFAULT_CATEGORY if __deeplink_node.is_default else "",
-						DEEPLINK_INTENT_FILTER_BROWSABLE_CATEGORY if __deeplink_node.is_browsable else "",
-						__deeplink_node.scheme,
-						__deeplink_node.host,
-						__deeplink_node.path_prefix
+						__config.label,
+						DEEPLINK_INTENT_FILTER_AUTO_VERIFY_PROPERTY if __config.is_auto_verify else "",
+						DEEPLINK_INTENT_FILTER_DEFAULT_CATEGORY if __config.is_default else "",
+						DEEPLINK_INTENT_FILTER_BROWSABLE_CATEGORY if __config.is_browsable else "",
+						__config.scheme,
+						__config.host,
+						__config.path_prefix
 					]
 
 		return DEEPLINK_ACTIVITY_FORMAT % __filters
@@ -111,6 +110,7 @@ class AndroidExportPlugin extends EditorExportPlugin:
 class IosExportPlugin extends EditorExportPlugin:
 	var _plugin_name = PLUGIN_NAME
 	var _export_path: String
+	var _export_config: DeeplinkExportConfig
 
 	const ENTITLEMENTS_FILE_HEADER: String = """<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -137,6 +137,10 @@ class IosExportPlugin extends EditorExportPlugin:
 	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
 		_export_path = path
 
+		var __export_config = DeeplinkExportConfig.new()
+		if not __export_config.export_config_file_exists() or __export_config.load_export_config_from_file() != OK:
+			__export_config.load_export_config_from_node()
+
 
 	func _export_end() -> void:
 		_regenerate_entitlements_file()
@@ -158,17 +162,9 @@ class IosExportPlugin extends EditorExportPlugin:
 					if __file:
 						__file.store_string(ENTITLEMENTS_FILE_HEADER)
 
-						var __deeplink_nodes: Array = Deeplink.get_deeplink_nodes(EditorInterface.get_edited_scene_root())
-						if __deeplink_nodes.is_empty():
-							var __main_scene = load(ProjectSettings.get_setting("application/run/main_scene")).instantiate()
-							__deeplink_nodes = Deeplink.get_deeplink_nodes(__main_scene)
-							if __deeplink_nodes.is_empty():
-								push_error("%s failed to find %s node!" % [PLUGIN_NAME, PLUGIN_NODE_TYPE_NAME])
-
-						for __node in __deeplink_nodes:
-							var __deeplink_node = __node as Deeplink
-							__file.store_line("\t\t<string>applinks:%s</string>" % __deeplink_node.host)
-							# As opposed to Android, in iOS __deeplink_node.scheme, __deeplink_node.path_prefix are
+						for __config in _export_config.deeplinks:
+							__file.store_line("\t\t<string>applinks:%s</string>" % __config.host)
+							# As opposed to Android, in iOS __config.scheme, __config.path_prefix are
 							# configured on the server side (apple-app-site-association file)
 
 						__file.store_string(ENTITLEMENTS_FILE_FOOTER)
