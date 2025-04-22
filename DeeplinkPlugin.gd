@@ -137,9 +137,9 @@ class IosExportPlugin extends EditorExportPlugin:
 	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
 		_export_path = path
 
-		var __export_config = DeeplinkExportConfig.new()
-		if not __export_config.export_config_file_exists() or __export_config.load_export_config_from_file() != OK:
-			__export_config.load_export_config_from_node()
+		_export_config = DeeplinkExportConfig.new()
+		if not _export_config.export_config_file_exists() or _export_config.load_export_config_from_file() != OK:
+			_export_config.load_export_config_from_node()
 
 
 	func _export_end() -> void:
@@ -150,12 +150,12 @@ class IosExportPlugin extends EditorExportPlugin:
 		if _export_path:
 			if _export_path.ends_with(EXPORT_FILE_SUFFIX):
 				var __project_path = ProjectSettings.globalize_path("res://")
-				print("******** PROJECT PATH='%s'" % __project_path)
+				push_warning("******** PROJECT PATH='%s'" % __project_path)
 				var __directory_path = "%s%s" % [__project_path, _export_path.trim_suffix(EXPORT_FILE_SUFFIX)]
 				if DirAccess.dir_exists_absolute(__directory_path):
 					var __project_name = _get_project_name_from_path(__directory_path)
 					var __file_path = "%s/%s.entitlements" % [__directory_path, __project_name]
-					print("******** ENTITLEMENTS FILE PATH='%s'" % __file_path)
+					push_warning("******** ENTITLEMENTS FILE PATH='%s'" % __file_path)
 					if FileAccess.file_exists(__file_path):
 						DirAccess.remove_absolute(__file_path)
 					var __file = FileAccess.open(__file_path, FileAccess.WRITE)
@@ -170,13 +170,13 @@ class IosExportPlugin extends EditorExportPlugin:
 						__file.store_string(ENTITLEMENTS_FILE_FOOTER)
 						__file.close()
 					else:
-						printerr("Couldn't open file '%s' for writing." % __file_path)
+						push_error("Couldn't open file '%s' for writing." % __file_path)
 				else:
-					printerr("Directory '%s' doesn't exist." % __directory_path)
+					push_error("Directory '%s' doesn't exist." % __directory_path)
 			else:
-				printerr("Unexpected export path '%s'" % _export_path)
+				push_error("Unexpected export path '%s'" % _export_path)
 		else:
-			printerr("Export path is not defined.")
+			push_error("Export path is not defined.")
 
 
 	func _get_project_name_from_path(a_path: String) -> String:
