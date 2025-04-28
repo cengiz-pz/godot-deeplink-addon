@@ -1,2 +1,12 @@
 # disable blank issue creation
 blank_issues_enabled: false
+
+contact_links:
+  - name: Android Issues
+    url: https://github.com/cengiz-pz/godot-android-deeplink-plugin/issues
+    about: Please report Android-related issues via the Android plugin repository.
+
+  - name: iOS Issues
+    url: https://github.com/cengiz-pz/godot-ios-deeplink-plugin/issues
+    about: Please report iOS-related issues via the iOS plugin repository.
+
