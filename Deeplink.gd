@@ -70,7 +70,7 @@ func get_link_url() -> String:
 	var __result = ""
 
 	if _plugin_singleton != null:
-		__result = _plugin_singleton.get_url()
+		__result = _null_check(_plugin_singleton.get_url())
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
@@ -81,7 +81,7 @@ func get_link_scheme() -> String:
 	var __result = ""
 
 	if _plugin_singleton != null:
-		__result = _plugin_singleton.get_scheme()
+		__result = _null_check(_plugin_singleton.get_scheme())
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
@@ -92,7 +92,7 @@ func get_link_host() -> String:
 	var __result = ""
 
 	if _plugin_singleton != null:
-		__result = _plugin_singleton.get_host()
+		__result = _null_check(_plugin_singleton.get_host())
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
@@ -103,7 +103,7 @@ func get_link_path() -> String:
 	var __result = ""
 
 	if _plugin_singleton != null:
-		__result = _plugin_singleton.get_path()
+		__result = _null_check(_plugin_singleton.get_path())
 	else:
 		printerr("%s plugin not initialized" % PLUGIN_SINGLETON_NAME)
 
@@ -119,3 +119,7 @@ func clear_data() -> void:
 
 func _on_deeplink_received(a_data: Dictionary) -> void:
 	deeplink_received.emit(DeeplinkUrl.new(a_data))
+
+
+func _null_check(a_value) -> String:
+	return "" if a_value == null else a_value
